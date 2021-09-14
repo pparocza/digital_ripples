@@ -9,6 +9,8 @@ class Piece {
 
         this.gain = audioCtx.createGain();
         this.gain.gain.value = 1;
+
+        // REVERB
     
         this.c = new MyConvolver(2, 3, audioCtx.sampleRate);
         this.cB = new MyBuffer(2, 3, audioCtx.sampleRate);
@@ -17,6 +19,8 @@ class Piece {
     
         this.c.setBuffer( this.cB.buffer );
         this.c.output.gain.value = 0.25;
+
+        // DELAY
     
         this.d = new Effect();
     
@@ -31,18 +35,52 @@ class Piece {
     
         this.f = new MyBiquad( "highpass" , 10 , 1 );
         this.f2 = new MyBiquad("lowpass" , 20000, 1 );
+
+        // LFO DELAY
+
+        this.dSend3In = new MyGain( 0.25 );
+        this.dSend3 = new Effect();
+        this.dSend3.randomShortDelay();
+        this.dSend3.on();
+        
+        this.dS3L1 = new MyBuffer2( 1 , 1 , audioCtx.sampleRate );
+        this.dS3L2 = new MyBuffer2( 1 , 1 , audioCtx.sampleRate );
+        this.dS3L1.noise().fill( 0 );
+        this.dS3L2.noise().fill( 0 );
+        this.dS3L1.constant( 0.04 ).multiply( 0 );
+        this.dS3L2.constant( 0.04 ).multiply( 0 );
+        this.dS3L1.loop = true;
+        this.dS3L2.loop = true;
+        this.dS3L1.playbackRate = randomFloat( 0.00001 , 0.000001 );
+        this.dS3L2.playbackRate = randomFloat( 0.00001 , 0.000001 );
+
+        this.dS3L1.connect( this.dSend3.dly.delayL.delayTime );
+        this.dS3L2.connect( this.dSend3.dly.delayR.delayTime );
+
+        this.dSend3In.connect( this.dSend3 );
+
+        this.dS3L1.start();
+        this.dS3L2.start();
     
+        // DISTORTION
+
+        // MAIN
+
         this.fadeFilter = new FilterFade(0);
     
         this.masterGain = audioCtx.createGain();
+
+        // CONNECTIONS
     
         this.masterGain.connect(this.c.input);
         this.masterGain.connect(this.d.input);
-    
+        this.masterGain.connect( this.dSend3In.input );
+
         this.masterGain.connect(this.gain);
 
         this.c.connect(this.cF);
         this.d.connect(this.dF);
+        this.dSend3.connect( this.dF );
 
         this.cF.connect(this.gain);
         this.dF.connect(this.gain);
@@ -367,19 +405,6 @@ class Piece {
 
         this.bufferSequence2Key(    this.pL*44 ,  this.pL*89 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 1 , this.fund * 1 , this.chord2 , this.pAHigh1 , this.gainVal * 0.75 );
         this.bufferSequence2Key(    this.pL*48 ,  this.pL*89 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 0.5 , this.fund * 0.5 , this.chord2 , this.pAHigh1 , this.gainVal * 0.5 );
-        // this.bufferSequence2KeyPan( this.pL*40 , this.pL*100 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 4 , this.fund * 2 , this.chord2 , this.pAHigh1 , this.gainVal * 2 );
-
-        /*
-        this.bufferSequence2Key( this.pL*32 , this.pL*36 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord3 , this.pAHigh1 , this.gainVal * 1 );
-        this.bufferSequence2Key( this.pL*32 , this.pL*36 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord3 , this.pAHigh1 , this.gainVal * 1 );
-        this.bufferSequence2KeyPan( this.pL*32 , this.pL*36 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord3 , this.pAHigh1 , this.gainVal * 2 );
-        this.bufferSequence2KeyPan( this.pL*32 , this.pL*36 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord3 , this.pAHigh1 , this.gainVal * 2 );
-
-        this.bufferSequence2Key( this.pL*36 , this.pL*40 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord2 , this.pAHigh1 , this.gainVal * 1 );
-        this.bufferSequence2Key( this.pL*36 , this.pL*40 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord2 , this.pAHigh1 , this.gainVal * 1 );
-        this.bufferSequence2KeyPan( this.pL*36 , this.pL*40 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord2 , this.pAHigh1 , this.gainVal * 2 );
-        this.bufferSequence2KeyPan( this.pL*36 , this.pL*40 , this.numberOfBuffers , this.bufferLength , 100 , this.rate ,  this.div * 2 , this.fund * 2 , this.chord2 , this.pAHigh1 , this.gainVal * 2 );
-        */
 
     }
 
