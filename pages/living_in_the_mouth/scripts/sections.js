@@ -64,6 +64,12 @@ class Piece {
     
         // DISTORTION
 
+        this.w = new MyWaveShaper();
+        this.w.makeSigmoid( 2 );
+        this.w.output.gain.value = 1;
+
+        this.wF = new MyBiquad( 'highpass' , 600 , 1 );
+
         // MAIN
 
         this.fadeFilter = new FilterFade(0);
@@ -84,6 +90,10 @@ class Piece {
 
         this.cF.connect(this.gain);
         this.dF.connect(this.gain);
+
+        this.gain.connect( this.w.input );
+        this.w.connect( this.wF );
+        this.wF.connect( this.f );
     
         this.gain.connect(this.f.input);
         this.f.connect(this.f2);
